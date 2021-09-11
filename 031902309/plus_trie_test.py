@@ -12,4 +12,7 @@ word = "中文"
 new_sub_trie: Dict[str, bool] = {"is_end": False}
 tmp_list = [word[0], p.get_pinyin(word[0]), p.get_initial(word[0])]
 print(tmp_list)
+for tmp_index,tmp_element in enumerate(tmp_list):
+    if 'z' in tmp_element:
+        print("yes"+tmp_element)
 
