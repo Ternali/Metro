@@ -29,3 +29,9 @@ print(tmp_result)
 result = result.split('-')
 print(result)
 
+# 对单个字进行测试
+result = p.get_initial("真")
+print(result)
+result = p.get_pinyin("真")
+print(result)
+
