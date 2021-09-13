@@ -19,7 +19,7 @@ class FourCorner:
         :param zh_word:
         :return:
         """
-        return self.data.get(zh_word)
+        return str(self.data.get(zh_word))[:-1]
 
 
 
