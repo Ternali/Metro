@@ -12,6 +12,5 @@ class FourCorner:
 
     # 获取对应汉字的四角编码
     def query(self, hanzi):
-        return int(self.data.get(hanzi), 2)
-
+        return self.data.get(hanzi)
 
