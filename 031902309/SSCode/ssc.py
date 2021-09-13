@@ -39,6 +39,10 @@ zhStructureDict = {}  # 汉字对应形体结构
 
 
 def getSoundCode(zh_word):
+    """
+    :param zh_word:
+    :return:
+    """
     sound_code = []
     # style拼音风格，heteronym是否启动多音字，strict只获取声母或者韵母相关拼音
     sheng_mu_code = pinyin(zh_word, style=pypinyin.INITIALS, heteronym=False, strict=False)[0][0]
@@ -80,6 +84,10 @@ def getSoundCode(zh_word):
 
 
 def getShapeCode(zh_word):
+    """
+    :param zh_word:
+    :return:
+    """
     shape_code = []
     structureShape = zhStructureDict.get(zh_word, '0')  # 获取对应形体结构
     shape_code.append(shapeDict[structureShape])
@@ -102,6 +110,9 @@ def getShapeCode(zh_word):
 
 # 获取汉字笔画数
 def getZHStrokesDict():
+    """
+    :param
+    """
     filepath = pkg_resources.resource_filename(__name__, "../zh_data/utf8_strokes.txt")
     # 获取已有汉字笔画数文件
     f = open(filepath, 'r', encoding='UTF-8')
@@ -114,6 +125,9 @@ def getZHStrokesDict():
 
 # 获取汉字结构
 def getZHStructureDict():
+    """
+    :param
+    """
     # 从已有文件中获取对应的结构形成键值对并插入
     filepath = pkg_resources.resource_filename(__name__, "../zh_data/unihan_structure.txt")
     f = open(filepath, 'r', encoding="UTF-8")
@@ -126,6 +140,9 @@ def getZHStructureDict():
 
 # 形成汉字音形码文件
 def createZHSSCFile():
+    """
+    :param
+    """
     readFilePath = pkg_resources.resource_filename(__name__, "../zh_data/unihan_structure.txt")
     writeFilePath = pkg_resources.resource_filename(__name__, "../zh_data/hanzi_ssc_res.txt")
     writeFile = open(writeFilePath, "w", encoding='UTF-8')
@@ -145,6 +162,9 @@ zhSSCDict = {}  # 汉字音形码
 
 # 汉字对应的音形码插入字典
 def getZHSSCDict():
+    """
+    :param
+    """
     filepath = pkg_resources.resource_filename(__name__, "../zh_data/hanzi_ssc_res.txt")
     f = open(filepath, 'r', encoding="UTF-8")
     for line in f:
@@ -155,13 +175,16 @@ def getZHSSCDict():
 
 # 获取汉字对应的音形码
 def getSSCCode(zh_word):
+    """
+    :param zh_word:
+    :return:
+    """
     soundCode = getSoundCode(zh_word)
     shapeCode = getShapeCode(zh_word)
     ssc = "".join(soundCode + shapeCode)
     return ssc
 
 
-if __name__ == "__main__":
-    print(getSoundCode("水"))
-    print(getShapeCode("水"))
-    print(getSSCCode("水"))
+
+
+
