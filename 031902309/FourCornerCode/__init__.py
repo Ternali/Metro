@@ -9,6 +9,7 @@ class FourCorner:
         data_file = pkg_resources.resource_filename(__name__, "../data/data.pkl")
         f = open(data_file, 'rb')
         self.data = pickle.load(f)
+        f.close()
 
     # 获取对应汉字的四角编码
     def query(self, hanzi):
