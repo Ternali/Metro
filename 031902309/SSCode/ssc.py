@@ -89,6 +89,8 @@ def getShapeCode(zh_word):
     :return:
     """
     shape_code = []
+    # 将对应的形体插入字典中
+    getZHStructureDict()
     structureShape = zhStructureDict.get(zh_word, '0')  # 获取对应形体结构
     shape_code.append(shapeDict[structureShape])
     # 获取对应汉字四角编码
@@ -100,6 +102,8 @@ def getShapeCode(zh_word):
         shape_code.extend(fc_code[:])
     # 获取汉字对应笔画数
     # 并添加至形码
+    # 将对应的笔画插入字典中
+    getZHStrokesDict()
     strokes = zhStrokeDict.get(zh_word, '0')
     if int(strokes) > 35:
         shape_code.append('Z')
