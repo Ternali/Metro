@@ -17,8 +17,8 @@ yun_muDict = {
     'ing': '01100', 'o': '01111', 'ou': '01110', 'ong': '01010',
     'e': '01001', 'ei': '01000', 'er': '11000', 'en': '11001',
     'eng': '11001', 'u': '11010', 'ui': '11110', 'un': '11111',
-    'ü': '11100', 'üe': '10100', 'ün': '10101'
-}
+    'v': '11100', 've': '10100', 'vn': '10101'
+}  # ü替代为v
 # 声母部分占5位
 sheng_muDict = {
     'b': '00000', 'p': '00001', 'm': '00011', 'f': '00010',
@@ -130,7 +130,7 @@ def getShapeCode(zh_word):
     # print(fc_code)用于测试四角编码原先对应数字
     # 判断四角编码是否为空一般不为空
     if fc_code is None:
-        shape_code.extend(['0000', '0000', '0000', '0000', '0000'])
+        shape_code.extend(['0000', '0000', '0000', '0000'])
     else:
         fc_code = getBin(fc_code)
         shape_code.extend(fc_code[:])
@@ -241,5 +241,9 @@ def getSSCCode(zh_word):
     return ssc
 
 
+# 测试代码相对应功能使用
 if __name__ == "__main__":
-    print(str(getSSCCode("汉")))
+    leng = 0
+    for element in getShapeCode("汉"):
+        leng += len(element)
+    print(leng)
