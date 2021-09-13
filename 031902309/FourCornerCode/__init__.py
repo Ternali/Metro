@@ -2,11 +2,11 @@ import pickle
 import pkg_resources
 
 
-class FourConrner:
-    
+class FourCorner:
+
     # 读取已有汉字四角编码
     def __init__(self):
-        data_file = pkg_resources.resource_filename(__name__, "data/data.pkl")
+        data_file = pkg_resources.resource_filename(__name__, "../data/data.pkl")
         f = open(data_file, 'rb')
         self.data = pickle.load(f)
 
@@ -14,4 +14,4 @@ class FourConrner:
     def query(self, hanzi):
         return int(self.data.get(hanzi), 2)
 
-    
+
