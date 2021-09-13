@@ -1,7 +1,7 @@
 import pickle
 import pkg_resources
 
-
+# 5位16进制共有20位2进制
 class FourCorner:
     """
     :type
@@ -20,4 +20,6 @@ class FourCorner:
         :return:
         """
         return self.data.get(zh_word)
+
+
 
