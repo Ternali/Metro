@@ -72,5 +72,3 @@ def computeSSCSimilarity(ssc1, ssc2):
     soundSimi = computeSoundCodeSimilarity(ssc1[:4], ssc2[:4])
     shapeSimi = computeShapeCodeSimilarity(ssc1[4:], ssc2[4:])
     return soundWeight * soundSimi + shapeWeight * shapeSimi
-
-
