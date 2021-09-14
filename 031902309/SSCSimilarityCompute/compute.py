@@ -1,6 +1,6 @@
 from math import exp
-
 from SSCode import ssc_new
+# 采用论文所述采用精度0.7降低错误检测概率，调整为0.8时错误检测概率降低15.8%，调整为0.7可降低38.1%，调整为0.6仅降低6%
 import re
 # 计算相似度
 # 拼音部分权重
@@ -12,6 +12,10 @@ shapeWeight = 0.5
 # 定义为0.5较为均衡
 # 采用新的计算相似度方式，这部分内容参考基于改进音形码的论文
 def Compute(ssc_one: str, ssc_two):
+    """
+    :param ssc_one:
+    :param ssc_two:
+    """
     sound_code_one = str(ssc_one[:17])
     sound_code_two = str(ssc_two[:17])
     shape_code_one = ssc_one[17:54]  # 如果取四角编码为20位则为58否则为54
@@ -29,7 +33,6 @@ def Compute(ssc_one: str, ssc_two):
                                                        exp(float(shape_code_hamming_distance)/36))
     s = b1 * (17 - sound_code_hamming_distance) / 17 + b2 * (36 - shape_code_hamming_distance)/36
     print(s)
-
 
 
 if __name__ == "__main__":
