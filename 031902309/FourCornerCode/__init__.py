@@ -19,7 +19,7 @@ class FourCorner:
         :param zh_word:
         :return:
         """
-        return str(self.data.get(zh_word))[:-1]
+        return self.data.get(zh_word)[:-1]  # 取四角编码为5位一部分[:-1]
 
 
 
