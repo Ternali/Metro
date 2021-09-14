@@ -130,7 +130,7 @@ def getShapeCode(zh_word):
     # print(fc_code)用于测试四角编码原先对应数字
     # 判断四角编码是否为空一般不为空
     if fc_code is None:
-        shape_code.extend(['0000', '0000', '0000', '0000'])  # 如果四角编码取5位则补充0000
+        shape_code.extend(['0000', '0000', '0000', '0000', '0000'])  # 如果四角编码取5位则补充0000
     else:
         fc_code = getBin(fc_code)
         shape_code.extend(fc_code[:])
@@ -141,7 +141,7 @@ def getShapeCode(zh_word):
     strokes = zhStrokeDict.get(zh_word, '0')
     # print(strokes)用于测试笔画原先对应数字
     if int(strokes) > 16:
-        shape_code.append('0000000011111111')
+        shape_code.append('1111111100000000')
     else:
         shape_code.append(strokesDict[int(strokes)])
     return shape_code
@@ -243,7 +243,4 @@ def getSSCCode(zh_word):
 
 # 测试代码相对应功能使用
 if __name__ == "__main__":
-    leng = 0
-    for element in getShapeCode("汉"):
-        leng += len(element)
-    print(leng)
+    print(getShapeCode("品"))
