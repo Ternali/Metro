@@ -130,7 +130,7 @@ def getShapeCode(zh_word):
     # print(fc_code)用于测试四角编码原先对应数字
     # 判断四角编码是否为空一般不为空
     if fc_code is None:
-        shape_code.extend(['0000', '0000', '0000', '0000'])
+        shape_code.extend(['0000', '0000', '0000', '0000'])  # 如果四角编码取5位则补充0000
     else:
         fc_code = getBin(fc_code)
         shape_code.extend(fc_code[:])
