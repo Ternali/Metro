@@ -1,5 +1,5 @@
 from math import exp
-
+from xpinyin import Pinyin
 from SSCode import ssc
 from SSCSimilarityCompute import ssc_similarity
 import difflib
@@ -22,6 +22,14 @@ def getBin(fc_code_param):
 
 
 if __name__ == "__main__":
+    # 获取拼音测试以及获取拼音首字母测试
+    for i in range(1, 17):
+        print(bin(0xFF))
+    p = Pinyin()
+    result = p.get_pinyin('测试').replace('-', '')
+    print(result)
+    '''
+    汉明距离求法测试
     print('str'[:-1])
     print(exp(1))
     print(eval('0b111000'))
@@ -37,6 +45,7 @@ if __name__ == "__main__":
     one = "0b1001"
     # one.decode()
     print("".join(difflib.Differ().compare(number, one)))
+    '''
 
     '''
     strs = ''
@@ -45,6 +54,7 @@ if __name__ == "__main__":
     print(strs)
     '''
 '''
+音码形码测试以及音形码测试
 o = ssc.getShapeCode("汉")
 print(o)
 i = ssc.getSoundCode("汉")
