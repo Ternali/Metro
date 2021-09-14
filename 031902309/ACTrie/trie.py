@@ -9,7 +9,6 @@ class Trie:
 
     def __init__(self):
         self.root = {}
-        self.root: Dict[List[str]]
         self.strMatrix = []
         self.strMatrix: List[List[str]]
         self.p_worker = Pinyin()
