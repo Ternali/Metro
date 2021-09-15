@@ -34,11 +34,17 @@ class Trie(object):
     # phrase_store为敏感词列表
     def prepareWork(self, phrase_store):
         # phrase为单个敏感词，未经组合的敏感词
-        for phrase in phrase_store:
-            self.str2matrix(phrase)
+        for index, phrase in enumerate(phrase_store):
+            if index == len(phrase_store) - 1:
+                self.str2matrix(phrase)
+            else:
+                self.str2matrix(phrase[:-1])
             # word为敏感词经过组合过的单个词语
             for word in self.phrase_list:
-                self.build_tree(word, phrase)
+                if index == len(phrase_store) - 1:
+                    self.build_tree(word, phrase)
+                else:
+                    self.build_tree(word, phrase[:-1])
         # 构建失败指针
         self.make_fail()
 
@@ -46,9 +52,10 @@ class Trie(object):
     def str2matrix(self, phrase):
         # 获取汉字对应的拼音以及对应的首字母
         # alpha为单个汉字或者英文字母注意
-        for alpha in phrase:
-            self.str_matrix.append([alpha, self.p_worker.get_pinyin(alpha).replace('-', ''),
-                                    str.lower(self.p_worker.get_initials(alpha).replace('-', ''))])
+        for letter in phrase:
+            self.str_matrix.append(['['+self.p_worker.get_pinyin(letter).replace('-', '')+']',
+                                    self.p_worker.get_pinyin(letter).replace('-', ''),
+                                    str.lower(self.p_worker.get_initials(letter).replace('-', ''))])
         self.insertKey(len(phrase))
 
     def insertKey(self, layer: int):
@@ -70,18 +77,47 @@ class Trie(object):
     def build_tree(self, phrase, initial: str):
         """构建字典树"""
         tmp_root = self.root
+        # 用于组成拼音板块的makeup和count判别
+        makeup = ''
+        length = 0
+        together = 0
         # letter表示敏感词组合过的词语的单个（汉字，字母
-        for letter in phrase:
-            if letter not in tmp_root.children:
-                node = Node()
-                node.word = letter
-                tmp_root.children.update({letter: node})
-            # 存在不存在均要转换成子节点
-            tmp_root = tmp_root.children[letter]
-        # 为当前末尾节点添加源词
-        tmp_root.source = initial
+        for i in range(0, len(phrase)):
+            # 因为需要完整的拼音串所以将拼音串添加到[]中然后提取即makeup为重组的拼音串
+            if phrase[i] == '[':
+                together = True
+                continue
+            if phrase[i] == ']':
+                together = False
+                length += 1
+                if makeup not in tmp_root.children:
+                    node = Node()
+                    node.word = makeup
+                    tmp_root.children.update({makeup: node})
+                # 存在不存在均要转换成子节点
+                tmp_root = tmp_root.children[makeup]
+                makeup = ""
+                continue
+
+            if together:
+                makeup += phrase[i]
+                continue
+            else:
+                length += 1
+                makeup = phrase[i]
+                if makeup not in tmp_root.children:
+                    node = Node()
+                    node.word = makeup
+                    tmp_root.children.update({makeup: node})
+                # 存在不存在均要转换成子节点
+                tmp_root = tmp_root.children[makeup]
+                makeup = ""
+
+        if tmp_root.source == "":
+            # 为当前末尾节点添加源词
+            tmp_root.source = initial
         # 为当前末尾节点添加当前敏感词组合序列的长度
-        tmp_root.length = len(phrase)
+        tmp_root.length = length
 
     # 构建fail指针
     def make_fail(self):
@@ -109,18 +145,19 @@ class Trie(object):
         # index_store用于存储相应的匹配开始的下标，主要用于避免关键词重叠
         # 用于筛选关键字避免出现添加关键字的子集情况
         # start用于辅助纠正关键字重叠的情况
-
+        zh_word = False
         index_store = []
         tmp = self.root
         for index, letter in enumerate(sentence):
             if self.illegalWord(letter):
                 # 说明匹配已经开始，非法字符可以通过，中文中插入数字字符则不能通过
                 continue
+            letter = self.p_worker.get_pinyin(letter).replace('-', '')
             while tmp.children.get(str.lower(letter)) is None and tmp.fail is not None:
                 tmp = tmp.fail
             # 匹配开始
-            if tmp.children.get(letter) is not None:
-                tmp = tmp.children.get(letter)
+            if tmp.children.get(str.lower(letter)) is not None:
+                tmp = tmp.children.get(str.lower(letter))
             # 如果temp的fail为空，代表temp为root节点，
             # 没有在树中找到符合的敏感字，故跳出循环，检索下个字符
             else:
@@ -160,28 +197,28 @@ class Trie(object):
                 if digit_contain:
                     return -1
         # 向容器中添加结果
-        self.combination.append("Line" + str(line) + " :<" + node.source + "> " + matched_part)
+        self.combination.append("Line" + str(line) + ": <" + node.source + "> " + matched_part)
         return cur_pos
 
     @staticmethod
     def illegalWord(letter) -> bool:
-        if letter in "[\"`~!@#$%^&*()+=|{}':;',\\.<>/?~！@#￥%……&*（）——+| {}【】‘；：”“’。，、？_]":
+        if letter in "0123456789[\"`~!@#$%^&*()+=|{}':;',\\.<>/?~！@#￥%……&*（）——+| {}【】‘；：”“’。，、？_] \n":
             return True
         return False
 
     def writeFile(self, file_name):
         f = open(file_name, "a", encoding="utf-8")
-        f.write("Total: " + str(len(self.combination)))
+        f.write("Total: " + str(len(self.combination)) + "\n")
         for element in self.combination:
-            f.write(element)
+            f.write(element + "\n")
         f.close()
         pass
 
 
 if __name__ == "__main__":
-    test_words = ["不知", "不觉", "忘了爱", "法轮攻"]
-    test_text = "忘l**ai。法***lun攻"
+    test_words = ["盗版", "垃圾"]
+    test_text = "拉圾网站，我这里有盗@#版软件。"
     model = Trie()
     model.prepareWork(test_words)
     model.search(test_text, 1)
-    print(model.combination)
+    model.writeFile('ans.txt')
