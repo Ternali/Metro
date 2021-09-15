@@ -1,39 +1,46 @@
+import re
+
 from xpinyin import Pinyin
 
 
-class Node:
+class Node(object):
+    """节点类"""
 
     def __init__(self):
-        self.children = {}  # 相当于指针，指向树节点的下一层节点
-        self.fail = None  # 失配指针，这个是AC自动机的关键
-        self.word = ""  # 用来储存标签
-        self.word_length = set()  # 用来存储字符长度
+        self.children = dict()
+        # 存放当前敏感词组合序列的部分
+        self.word = ""
+        # 存放源敏感词未经任何修改
+        self.source = ""
+        self.fail = None
+        self.tail = None
+        self.length = 0
 
 
-class Trie:
+class Trie(object):
+    """ac 自动机"""
 
     def __init__(self):
+        self.root = Node()
+        # 用于处理汉字拼音
+        self.p_worker = Pinyin()
         # 用于存放汉字，汉字拼音和拼音首字母部分
         self.str_matrix = []
-        #
-        self.dict_trie = {}
-        self.p_worker = Pinyin()
-        self.root = Node()
         # 存放相关的词组序列
         self.phrase_list = []
-        # 用于存放匹配的原文内容
-        self.source_result = []
-        # 用于存放匹配到的敏感词
-        self.word_result = []
-        # 用于存放对应的函数
-        self.line_result = []
+        # 用于存放匹配的组合内容
+        self.combination = []
 
+    # phrase_store为敏感词列表
     def prepareWork(self, phrase_store):
+        # phrase为单个敏感词，未经组合的敏感词
         for phrase in phrase_store:
             self.str2matrix(phrase)
-            for element in self.phrase_list:
-                self.insert(element, phrase)
-        self.makeFail()
+            # word为敏感词经过组合过的单个词语
+            for word in self.phrase_list:
+                self.build_tree(word, phrase)
+        # 构建失败指针
+        self.make_fail()
 
     # 将敏感词转换为对应的矩阵便于后续插入字典树中
     def str2matrix(self, phrase):
@@ -59,72 +66,122 @@ class Trie:
                 self.recursionInsertKey(row_now + 1, layer,
                                         phrase + self.str_matrix[row_now][column_now])
 
-    # 将所有模式串插入树中
-    def insert(self, word, source: str):
-        temp_root = self.root
-        for part in word:
-            # 如果不包含这个字符就创建孩子节点
-            if part not in temp_root.children:
-                temp_root.children[part] = Node()
-            # temp指向孩子节点
-            temp_root = temp_root.children[part]
-            if temp_root.word == "":
-                temp_root.word = source
-        # 一个字符串遍历完了后，将其长度保存到最后一个孩子节点信息中
-        temp_root.word_length.add(len(word))
+    # phrase为单个组合过的敏感词，initial为源敏感词即没有经过组合的敏感词
+    def build_tree(self, phrase, initial: str):
+        """构建字典树"""
+        tmp_root = self.root
+        # letter表示敏感词组合过的词语的单个（汉字，字母
+        for letter in phrase:
+            if letter not in tmp_root.children:
+                node = Node()
+                node.word = letter
+                tmp_root.children.update({letter: node})
+            # 存在不存在均要转换成子节点
+            tmp_root = tmp_root.children[letter]
+        # 为当前末尾节点添加源词
+        tmp_root.source = initial
+        # 为当前末尾节点添加当前敏感词组合序列的长度
+        tmp_root.length = len(phrase)
 
-    # 构建失败路径
-    def makeFail(self):
-        temp_que = [self.root]
-        while len(temp_que) != 0:
-            # 获取节点
-            temp = temp_que.pop(0)
-            # 获取孩子节点的所有键值信息
-            iterators = temp.children.keys()
-            for child_key in iterators:
-                y = temp.children[child_key]
-                fa_fail = temp.fail
-                while fa_fail is not None and child_key not in fa_fail.children:
-                    fa_fail = fa_fail.fail
-                if fa_fail is None:
-                    y.fail = self.root
+    # 构建fail指针
+    def make_fail(self):
+        tmp_que = [self.root]
+        while len(tmp_que) != 0:
+            # 开始遍历子节点
+            sub_root = tmp_que.pop(0)
+            p = None
+            for key, value in sub_root.children.items():
+                # 将子节点的fail指针指向root节点
+                if sub_root == self.root:
+                    sub_root.children[key].fail = self.root
                 else:
-                    y.fail = fa_fail.children[child_key]
-                if y.fail.word_length is not None:
-                    y.word_length.update(y.fail.word_length)
-                temp_que.append(y)
+                    p = sub_root.fail
+                    while p is not None:
+                        if key in p.children:
+                            sub_root.children[key].fail = p.fail
+                            break
+                        p = p.fail
+                    if p is None:
+                        sub_root.children[key].fail = self.root
+                tmp_que.append(sub_root.children[key])
 
-    def search(self, s: str, line: int):
+    def search(self, sentence, line):
+        # index_store用于存储相应的匹配开始的下标，主要用于避免关键词重叠
+        # 用于筛选关键字避免出现添加关键字的子集情况
+        # start用于辅助纠正关键字重叠的情况
+        start = -1
+        index_store = []
         tmp = self.root
-        for index, element in enumerate(s):
-            while tmp.children.get(element) is None and tmp.fail is not None:
+        for index, letter in enumerate(sentence):
+            if self.illegalWord(letter):
+                # 说明匹配已经开始，非法字符可以通过，中文中插入数字字符则不能通过
+                continue
+            while tmp.children.get(letter) is None and tmp.fail is not None:
                 tmp = tmp.fail
-            if tmp.children.get(element) is not None:
-                tmp = tmp.children.get(element)
+            # 匹配开始
+            if tmp.children.get(letter) is not None:
+                tmp = tmp.children.get(letter)
             # 如果temp的fail为空，代表temp为root节点，
             # 没有在树中找到符合的敏感字，故跳出循环，检索下个字符
             else:
                 continue
             # 如果检索到当前节点的长度信息存在，则代表搜索到了敏感词，打印输出即可
-            if len(tmp.word_length):
-                self.matched(tmp, s, index, line)
+            if tmp.length:
+                # af_start用于判别上一原文敏感词是否属于当前原文敏感词内容
+                af_start = self.matched(node=tmp, sentence=sentence, cur_pos=index, line=line)
+                if len(index_store):
+                    if af_start == index_store[len(index_store) - 1]:
+                        # 说明上个原文敏感词还真是当前敏感词的子集
+                        self.combination.pop(len(self.combination) - 2)
+                index_store.append(af_start)
 
     # 利用节点存储的字符长度信息，打印输出敏感词及其在搜索串内的坐标
-    def matched(self, node, s, cur_pos, line: int):
-        for word_len in node.word_length:
-            start_index = cur_pos - word_len + 1
-            match_part = s[start_index: cur_pos + 1]
-            self.source_result.append(match_part)
-            self.word_result.append(node.word)
-            self.line_result.append(line)
+    def matched(self, node, sentence, cur_pos, line: int) -> int:
+        # cur_pos变化后用于计算开始匹配的内容下标用于去除重叠的子集
+        # 用于存放匹配到的对应内容
+        matched_part = ""
+        word_length = node.length
+        while word_length:
+            # 非法字符不计入总个数
+            if self.illegalWord(sentence[cur_pos]):
+                matched_part = matched_part + sentence[cur_pos]
+            # 正常字符需要减一即反向获取对应的内容
+            else:
+                matched_part = matched_part + sentence[cur_pos]
+                word_length -= 1
+            # 正常字符向后退
+            cur_pos -= 1
+        matched_part = matched_part[::-1]
+        # 用于检验是否含有中文，如果含有中文那么如果夹杂数学字符则非敏感词，返回-1
+        for letter in matched_part:
+            if '\u4e00' <= letter <= '\u9fff':
+                # 确实有中文那么检验是否有数字
+                digit_contain = bool(re.search(r'\d', matched_part))
+                if digit_contain:
+                    return -1
+        # 向容器中添加结果
+        self.combination.append("Line" + str(line) + " :<" + node.source + "> " + matched_part)
+        return cur_pos
+
+    @staticmethod
+    def illegalWord(letter) -> bool:
+        if letter in "[\"`~!@#$%^&*()+=|{}':;',\\.<>/?~！@#￥%……&*（）——+| {}【】‘；：”“’。，、？_]":
+            return True
+        return False
+
+    def writeFile(self, file_name):
+        f = open(file_name, "a", encoding="utf-8")
+        f.write("Total: " + str(len(self.combination)))
+        for element in self.combination:
+            f.write(element)
+        f.close()
+        pass
 
 
 if __name__ == "__main__":
-    test_words = ["不知", "不觉", "忘了爱"]
-    test_text = """不知、不觉·间我~|~已经忘lai❤。"""
+    test_words = ["不知", "不觉", "忘了爱", "法轮攻"]
+    test_text = "忘l**ai。法***lun攻"
     model = Trie()
     model.prepareWork(test_words)
     model.search(test_text, 1)
-    print(model.source_result)
-    print(model.word_result)
-    print(model.line_result)
+    print(model.combination)
