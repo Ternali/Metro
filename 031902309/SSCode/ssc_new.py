@@ -52,6 +52,7 @@ strokesDict = {1: '0000000000000001',
 
 zhStrokeDict = {}  # 汉字对应笔画数
 zhStructureDict = {}  # 汉字对应形体结构
+gotDict = False  # 用于判断是否已经成功将笔画和形体读入上述字典中
 
 
 def getSoundCode(zh_word):
@@ -114,14 +115,27 @@ def getSoundCode(zh_word):
     return sound_code
 
 
+def getUsefulDict():
+    global gotDict
+    if not gotDict:
+        # 将已有汉字形体读入字典中
+        getZHStructureDict()
+        # 将已有汉字笔画数读入字典中
+        getZHStrokesDict()
+        gotDict = True
+
+
 def getShapeCode(zh_word):
     """
     :param zh_word:
     :return:
     """
     shape_code = []
-    # 将对应的形体插入字典中
-    getZHStructureDict()
+    # 将对应的形体和对应笔画数插入字典中
+    global gotDict
+    if not gotDict:
+        getUsefulDict()
+        gotDict = True
     structureShape = zhStructureDict.get(zh_word, '0')  # 获取对应形体结构
     # print(structureShape)用于测试结构位原先对应数字
     shape_code.append(shapeDict[structureShape])
@@ -137,7 +151,6 @@ def getShapeCode(zh_word):
     # 获取汉字对应笔画数
     # 并添加至形码
     # 将对应的笔画插入字典中
-    getZHStrokesDict()
     strokes = zhStrokeDict.get(zh_word, '0')
     # print(strokes)用于测试笔画原先对应数字
     if int(strokes) > 16:
@@ -240,6 +253,10 @@ def getSSCCode(zh_word):
     ssc = "".join(soundCode + shapeCode)
     return ssc
 
+
+# 添加拆分左右结构汉字功能
+def separateZH()-> str:
+    pass
 
 # 测试代码相对应功能使用
 if __name__ == "__main__":
