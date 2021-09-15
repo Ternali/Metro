@@ -109,14 +109,14 @@ class Trie(object):
         # index_store用于存储相应的匹配开始的下标，主要用于避免关键词重叠
         # 用于筛选关键字避免出现添加关键字的子集情况
         # start用于辅助纠正关键字重叠的情况
-        start = -1
+
         index_store = []
         tmp = self.root
         for index, letter in enumerate(sentence):
             if self.illegalWord(letter):
                 # 说明匹配已经开始，非法字符可以通过，中文中插入数字字符则不能通过
                 continue
-            while tmp.children.get(letter) is None and tmp.fail is not None:
+            while tmp.children.get(str.lower(letter)) is None and tmp.fail is not None:
                 tmp = tmp.fail
             # 匹配开始
             if tmp.children.get(letter) is not None:
