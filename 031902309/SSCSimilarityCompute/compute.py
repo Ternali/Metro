@@ -37,5 +37,5 @@ def Compute(ssc_one: str, ssc_two):
 
 
 if __name__ == "__main__":
-    print(Compute(ssc_new.getSSCCode("太"), ssc_new.getSSCCode("大")))
+    print(Compute(ssc_new.getSSCCode("斌"), ssc_new.getSSCCode("彬")))
     print(Compute(ssc_new.getSSCCode("里"), ssc_new.getSSCCode("李")))

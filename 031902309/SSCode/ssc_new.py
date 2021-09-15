@@ -254,10 +254,6 @@ def getSSCCode(zh_word):
     return ssc
 
 
-# 添加拆分左右结构汉字功能
-def separateZH()-> str:
-    pass
-
 # 测试代码相对应功能使用
 if __name__ == "__main__":
     print(getShapeCode("品"))
