@@ -145,7 +145,6 @@ class Trie(object):
         # index_store用于存储相应的匹配开始的下标，主要用于避免关键词重叠
         # 用于筛选关键字避免出现添加关键字的子集情况
         # start用于辅助纠正关键字重叠的情况
-        zh_word = False
         index_store = []
         tmp = self.root
         for index, letter in enumerate(sentence):
@@ -216,8 +215,8 @@ class Trie(object):
 
 
 if __name__ == "__main__":
-    test_words = ["盗版", "垃圾"]
-    test_text = "拉圾网站，我这里有盗@#版软件。"
+    test_words = ["sub\n", "垃圾"]
+    test_text = "拉圾网站，我这里有盗@#版软件。su*&b"
     model = Trie()
     model.prepareWork(test_words)
     model.search(test_text, 1)
