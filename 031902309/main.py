@@ -3,6 +3,10 @@ import sys
 from ACTrie.actrie import Trie
 
 args = sys.argv
+# 参数错误
+if len(args) != 4:
+    print("参数错误")
+    exit(-1)
 AcTrie = Trie()
 f = open(args[1], encoding="utf-8")
 # 读取敏感词文件一次性读取所有行数
