@@ -216,7 +216,7 @@ class Trie(object):
 
 if __name__ == "__main__":
     test_words = ["sub\n", "垃圾"]
-    test_text = "拉圾网站，我这里有盗@#版软件。su*&b"
+    test_text = "拉123圾网站，我这里有盗@#版软件。su*&b"
     model = Trie()
     model.prepareWork(test_words)
     model.search(test_text, 1)
