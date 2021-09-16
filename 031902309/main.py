@@ -5,7 +5,14 @@ from ACTrie.actrie import Trie
 args = sys.argv
 # 参数错误
 if len(args) != 4:
-    print("参数错误")
+    print("参数数目冗余或者缺失")
+    exit(-1)
+if args[1] != "words.txt":
+    print("敏感词文件参数错误")
+if args[2] != "org.txt":
+    print("待检测文件参数错误")
+if args[3] != "ans.txt":
+    print("答案写入文件参数错误")
     exit(-1)
 AcTrie = Trie()
 work_store = []
