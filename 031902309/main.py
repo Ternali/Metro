@@ -36,3 +36,4 @@ try:
     AcTrie.writeFile(args[3])
 except FileNotFoundError:
     print("文件不存在")
+
