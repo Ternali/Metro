@@ -2,7 +2,6 @@ from math import exp
 from SSCode import ssc_new
 # 汉字检验确实较为困难，代码可针对异体字做出判断分析
 # 采用论文所述采用精度0.7降低错误检测概率，调整为0.8时错误检测概率降低15.8%，调整为0.7可降低38.1%，调整为0.6仅降低6%
-import re
 # 计算相似度
 # 拼音部分权重
 soundWeight = 0.5

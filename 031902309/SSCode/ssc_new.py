@@ -20,7 +20,7 @@ yun_muDict = {
     'v': '11100', 've': '10100', 'vn': '10101'
 }  # ü替代为v
 # 声母部分占5位
-sheng_muDict = {
+shewing_muDict = {
     'b': '00000', 'p': '00001', 'm': '00011', 'f': '00010',
     'd': '00111', 't': '00101', 'n': '00100', 'l': '01100',
     'g': '01111', 'k': '01110', 'h': '01010', 'j': '01001',
@@ -61,57 +61,56 @@ def getSoundCode(zh_word):
     :return:
     """
     sound_code = []
-    # style拼音风格，heteronym是否启动多音字，strict只获取声母或者韵母相关拼音
-    sheng_mu_code = pinyin(zh_word, style=pypinyin.INITIALS, heteronym=False, strict=False)[0][0]
+    # style拼音风格，hetero是否启动多音字，strict只获取声母或者韵母相关拼音
+    shewing_mu_code = pinyin(zh_word, style=pypinyin.INITIALS, strict=False)[0][0]
     # 如果目标汉字声母不在已有声母集合中
-    # print(sheng_mu_code)用于测试声母
-    if sheng_mu_code not in sheng_muDict:
-        sheng_mu_code = '00000'
+    # print(shewing_mu_code)用于测试声母
+    if shewing_mu_code not in shewing_muDict:
+        shewing_mu_code = '00000'
 
-    yun_mu_code = pinyin(zh_word, style=pypinyin.FINALS_TONE3, heteronym=False, strict=True)[0][0]
+    yun_mu_code = pinyin(zh_word, style=pypinyin.FINALS_TONE3)[0][0]
 
     # 用于获取音调和去除韵母中音调，提前声明以防止尴尬情况发生
-    yin_diao = '0'
     # 用于去除韵母中音调部分
     if yun_mu_code[-1] in ['1', '2', '3', '4']:
-        yin_diao = yun_mu_code[-1]
-        if yin_diao == '1':
-            yin_diao = '00'
-        elif yin_diao == '2':
-            yin_diao = '01'
-        elif yin_diao == '3':
-            yin_diao = '10'
+        pronunciation = yun_mu_code[-1]
+        if pronunciation == '1':
+            pronunciation = '00'
+        elif pronunciation == '2':
+            pronunciation = '01'
+        elif pronunciation == '3':
+            pronunciation = '10'
         else:
-            yin_diao = '11'
+            pronunciation = '11'
         yun_mu_code = yun_mu_code[:-1]
     else:
-        yin_diao = '00'
+        pronunciation = '00'
         yun_mu_code = yun_mu_code[:-1]
 
-    # print(yin_diao)用于测试音调
+    # print(pronunciation)用于测试音调
     # print(yun_mu_code)用于测试韵母
     # 汇聚成音码
     if yun_mu_code in yun_muDict:
-        sound_code.append(sheng_muDict[sheng_mu_code])
+        sound_code.append(shewing_muDict[shewing_mu_code])
         # 按照顺序:声母，韵母辅音补码，韵母，音调
         sound_code.append(yun_muDict[yun_mu_code])
         sound_code.append('00000')
     # 由于可能声母和韵母之间有补码位需要区分
     elif len(yun_mu_code) > 1:
-        sound_code.append(sheng_muDict[sheng_mu_code])
+        sound_code.append(shewing_muDict[shewing_mu_code])
         # 获取不含补码位的韵母
         sound_code.append(yun_muDict[yun_mu_code[1:]])
         # 添加韵母补码位进去
         sound_code.append(yun_muDict[yun_mu_code[0]])
     # 仅有一位补码位没有韵母
     else:
-        sound_code.append(sheng_muDict[sheng_mu_code])
+        sound_code.append(shewing_muDict[shewing_mu_code])
         sound_code.append('00000')
         # 添加韵母补码位
         sound_code.append('00000')
     # 补充音调码
 
-    sound_code.append(yin_diao)
+    sound_code.append(pronunciation)
     return sound_code
 
 

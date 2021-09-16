@@ -125,7 +125,7 @@ class Trie(object):
         while len(tmp_que) != 0:
             # 开始遍历子节点
             sub_root = tmp_que.pop(0)
-            p = None
+            # p = None
             for key, value in sub_root.children.items():
                 # 将子节点的fail指针指向root节点
                 if sub_root == self.root:

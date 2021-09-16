@@ -2,7 +2,7 @@ from SSCSimilarityCompute.compute import Compute
 
 
 class KMP(object):
-    # thrshold为模糊度即使用模糊度匹配不使用完全匹配
+    # 模糊度即使用模糊度匹配不使用完全匹配
     # 求模式串T的next函数（修正方法）值并存入next数组
     # nextVal = [-1]
     # startIdxRes = []#写在这里，多次使用kmp时startIdxRes不会被清空而是存放了上一次的数据，影响结果
@@ -56,5 +56,3 @@ class KMP(object):
                     self.nextVal.append(j)
             else:
                 j = self.nextVal[j]
-
-
